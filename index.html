@@ -52,7 +52,7 @@
 
   /* posts */
   .post-list{display:flex;flex-direction:column;gap:1px}
-  .post{background:var(--bg-elevated);border-radius:10px;padding:32px 0;margin-bottom:2px;transition:background .2s;animation:fadeIn .4s ease both}
+  .post{background:var(--bg-elevated);border-radius:10px;padding:32px 0;margin-bottom:2px;transition:background .2s;animation:fadeIn .4s ease both;cursor:pointer}
   .post:hover{background:var(--bg-hover)}
   .post+.post{border-top:1px solid var(--border)}
   @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -68,6 +68,23 @@
   .dot-professional{background:#5a9fd4}.dot-personal{background:#c8a96e}.dot-uncategorized{background:#666}
 
   .empty-state{text-align:center;padding:80px 0;color:var(--text-subtle);font-style:italic;font-size:1rem;display:none}
+
+  /* ─── FULL ARTICLE VIEW ─── */
+  .article-view{display:none;animation:fadeIn .35s ease}
+  .article-back{display:inline-flex;align-items:center;gap:6px;font-family:'Syne',sans-serif;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-subtle);background:none;border:none;cursor:pointer;padding:0;margin-bottom:32px;transition:color .2s}
+  .article-back:hover{color:var(--accent)}
+  .article-view .a-title{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:10px;transition:color .35s}
+  .article-view .a-meta{display:flex;align-items:center;gap:10px;margin-bottom:28px;flex-wrap:wrap}
+  .article-view .a-date{font-family:'Syne',sans-serif;font-size:.68rem;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.06em;transition:color .35s}
+  .article-view .a-tags{display:flex;gap:6px;flex-wrap:wrap}
+  .article-view .a-tag{font-family:'Syne',sans-serif;font-size:.62rem;font-weight:500;text-transform:uppercase;letter-spacing:.07em;background:var(--tag-bg);color:var(--tag-text);padding:4px 9px;border-radius:4px;transition:background .35s,color .35s}
+  .article-body{font-size:1.02rem;color:var(--text-muted);line-height:1.9;transition:color .35s}
+  .article-body p{margin-bottom:1em}
+  .article-body img{max-width:100%;border-radius:8px;margin:18px 0;display:block;box-shadow:0 4px 24px rgba(0,0,0,.18)}
+  .article-body b,.article-body strong{color:var(--text);font-weight:600}
+  .article-body i,.article-body em{font-style:italic}
+  /* fallback: show excerpt as body if no rich body */
+  .article-excerpt-only{font-size:1.02rem;color:var(--text-muted);line-height:1.9;font-style:italic}
 
   footer{text-align:center;padding:60px 0 40px;margin-top:40px}
   footer span{font-family:'Syne',sans-serif;font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;color:var(--text-subtle);transition:color .35s}
@@ -107,6 +124,17 @@
 
   <div class="post-list" id="postList"></div>
   <div class="empty-state" id="emptyState">No articles match your search.</div>
+
+  <!-- FULL ARTICLE VIEW -->
+  <div class="article-view" id="articleView">
+    <button class="article-back" onclick="closeArticle()">← Back to Articles</button>
+    <h1 class="a-title" id="articleTitle"></h1>
+    <div class="a-meta">
+      <span class="a-date" id="articleDate"></span>
+      <div class="a-tags" id="articleTags"></div>
+    </div>
+    <div class="article-body" id="articleBody"></div>
+  </div>
   <footer><span>© 2025 Today I Learned</span></footer>
 </div>
 
@@ -148,7 +176,7 @@ function render(){
   filtered.forEach((post,i)=>{
     const tagsHtml=post.tags.map(t=>`<span class="post-tag">${t}</span>`).join("");
     list.innerHTML+=`
-      <article class="post" style="animation-delay:${i*.04}s">
+      <article class="post" style="animation-delay:${i*.04}s" onclick="openArticle('${post.id}')" style="cursor:pointer">
         <div class="post-inner">
           <div class="post-top">
             <div class="post-title">${post.title}</div>
@@ -175,6 +203,40 @@ function toggleTheme(){
   const h=document.documentElement,k=document.getElementById("knobIcon");
   if(h.dataset.theme==="dark"){h.dataset.theme="light";k.textContent="☀️"}
   else{h.dataset.theme="dark";k.textContent="🌙"}
+}
+
+// ─── ARTICLE VIEW ───
+function openArticle(id){
+  const post=getPosts().find(p=>p.id===id);
+  if(!post)return;
+
+  document.getElementById("articleTitle").textContent=post.title;
+  document.getElementById("articleDate").textContent=post.date;
+  document.getElementById("articleTags").innerHTML=post.tags.map(t=>`<span class="a-tag">${t}</span>`).join("");
+
+  // If there's a rich body use it; otherwise fall back to excerpt in italics
+  const bodyEl=document.getElementById("articleBody");
+  if(post.body && post.body.trim()!==""){
+    bodyEl.innerHTML=post.body;
+  } else {
+    bodyEl.innerHTML=`<p class="article-excerpt-only">${post.excerpt}</p>`;
+  }
+
+  // swap views
+  document.getElementById("postList").style.display="none";
+  document.getElementById("emptyState").style.display="none";
+  document.querySelector(".controls").style.display="none";
+  document.querySelector("header").style.display="none";
+  document.getElementById("articleView").style.display="block";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function closeArticle(){
+  document.getElementById("articleView").style.display="none";
+  document.getElementById("postList").style.display="flex";
+  document.querySelector(".controls").style.display="flex";
+  document.querySelector("header").style.display="block";
+  render();
 }
 
 render();
