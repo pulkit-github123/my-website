@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TODAY I LEARNED…</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  [data-theme="dark"] {
+    --bg:#0e0e0e; --bg-elevated:#161616; --bg-hover:#1e1e1e;
+    --text:#e4e4e4; --text-muted:#666; --text-subtle:#444;
+    --border:#242424; --accent:#c8a96e; --accent-dim:rgba(200,169,110,0.15);
+    --input-bg:#141414; --tag-bg:#1a1a1a; --tag-text:#888;
+  }
+  [data-theme="light"] {
+    --bg:#f8f7f4; --bg-elevated:#ffffff; --bg-hover:#f0efe9;
+    --text:#1a1a1a; --text-muted:#888; --text-subtle:#aaa;
+    --border:#e8e6e0; --accent:#a07840; --accent-dim:rgba(160,120,64,0.1);
+    --input-bg:#ffffff; --tag-bg:#eeece6; --tag-text:#777;
+  }
+
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:'EB Garamond',Georgia,serif;background:var(--bg);color:var(--text);line-height:1.8;min-height:100vh;transition:background .35s,color .35s}
+  .container{max-width:680px;margin:0 auto;padding:0 24px}
+
+  /* header */
+  header{padding:72px 0 48px;text-align:center;position:relative}
+  header h1{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text);transition:color .35s}
+  header p{font-style:italic;color:var(--text-muted);font-size:1rem;margin-top:6px;transition:color .35s}
+
+  /* nav link to admin */
+  .admin-link{position:fixed;top:22px;left:28px;z-index:100;font-family:'Syne',sans-serif;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-subtle);text-decoration:none;background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;padding:7px 14px;transition:all .2s}
+  .admin-link:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* theme toggle */
+  .theme-toggle{position:fixed;top:22px;right:28px;z-index:100;background:var(--bg-elevated);border:1px solid var(--border);border-radius:50px;width:52px;height:28px;cursor:pointer;transition:background .35s,border-color .35s;display:flex;align-items:center;padding:0 4px}
+  .theme-toggle .knob{width:20px;height:20px;border-radius:50%;background:var(--accent);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;justify-content:center;font-size:11px}
+  [data-theme="light"] .theme-toggle .knob{transform:translateX(24px)}
+
+  /* controls */
+  .controls{display:flex;gap:12px;align-items:center;margin-bottom:40px}
+  .search-wrap{flex:1;position:relative}
+  .search-wrap input{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:11px 16px 11px 42px;font-family:'Syne',sans-serif;font-size:.78rem;color:var(--text);outline:none;transition:border-color .2s,background .35s,color .35s;letter-spacing:.02em}
+  .search-wrap input::placeholder{color:var(--text-subtle)}
+  .search-wrap input:focus{border-color:var(--accent)}
+  .search-wrap .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-subtle);pointer-events:none;font-size:14px}
+  .filters{display:flex;gap:6px;flex-wrap:wrap}
+  .filter-btn{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;background:var(--tag-bg);color:var(--tag-text);border:1px solid var(--border);border-radius:6px;padding:7px 14px;cursor:pointer;transition:all .2s;white-space:nowrap}
+  .filter-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .filter-btn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+
+  /* posts */
+  .post-list{display:flex;flex-direction:column;gap:1px}
+  .post{background:var(--bg-elevated);border-radius:10px;padding:32px 0;margin-bottom:2px;transition:background .2s;animation:fadeIn .4s ease both}
+  .post:hover{background:var(--bg-hover)}
+  .post+.post{border-top:1px solid var(--border)}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .post-inner{padding:0 28px}
+  .post-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;gap:16px}
+  .post-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:600;color:var(--text);transition:color .2s;line-height:1.4}
+  .post:hover .post-title{color:var(--accent)}
+  .post-date{font-family:'Syne',sans-serif;font-size:.68rem;color:var(--text-subtle);white-space:nowrap;text-transform:uppercase;letter-spacing:.06em;transition:color .35s}
+  .post-excerpt{font-size:.95rem;color:var(--text-muted);line-height:1.75;margin-bottom:14px;transition:color .35s}
+  .post-footer{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .post-tag{font-family:'Syne',sans-serif;font-size:.62rem;font-weight:500;text-transform:uppercase;letter-spacing:.07em;background:var(--tag-bg);color:var(--tag-text);padding:4px 9px;border-radius:4px;transition:background .35s,color .35s}
+  .post-cat-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+  .dot-professional{background:#5a9fd4}.dot-personal{background:#c8a96e}.dot-uncategorized{background:#666}
+
+  .empty-state{text-align:center;padding:80px 0;color:var(--text-subtle);font-style:italic;font-size:1rem;display:none}
+
+  footer{text-align:center;padding:60px 0 40px;margin-top:40px}
+  footer span{font-family:'Syne',sans-serif;font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;color:var(--text-subtle);transition:color .35s}
+
+  @media(max-width:560px){
+    header{padding:56px 0 36px}header h1{font-size:1.35rem}
+    .controls{flex-direction:column;align-items:stretch}
+    .post-inner{padding:0 20px}.post-top{flex-direction:column;gap:4px}
+    .admin-link{left:50%;transform:translateX(-50%);top:10px}
+  }
+</style>
+</head>
+<body>
+
+<a href="admin.html" class="admin-link">⚙ Admin</a>
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+  <div class="knob" id="knobIcon">🌙</div>
+</button>
+
+<div class="container">
+  <header>
+    <h1>Today I Learned…</h1>
+    <p>Memoirs of my learnings</p>
+  </header>
+
+  <div class="controls">
+    <div class="search-wrap">
+      <span class="search-icon">&#128269;</span>
+      <input type="text" id="searchInput" placeholder="Search articles…" oninput="render()"/>
+    </div>
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all" onclick="setFilter(this)">All</button>
+      <button class="filter-btn" data-filter="professional" onclick="setFilter(this)">Professional</button>
+      <button class="filter-btn" data-filter="personal" onclick="setFilter(this)">Personal</button>
+    </div>
+  </div>
+
+  <div class="post-list" id="postList"></div>
+  <div class="empty-state" id="emptyState">No articles match your search.</div>
+  <footer><span>© 2025 Today I Learned</span></footer>
+</div>
+
+<script>
+// ─── DEFAULT SEED DATA ───
+const SEED = [
+  {id:"seed-1",title:"What is a CAGR, IRR and XIRR and how do they look?",date:"May 1, 2023",category:"personal",excerpt:"The prequel to this post is about why absolute percentage is a bad way to judge investments. But it is not necessary — you can just devour the diagrams below to better understand what CAGR, IRR, and XIRR really mean, and how they visually differ.",body:"",tags:["Financial Education","Personal Finance"],status:"published"},
+  {id:"seed-2",title:"On UPI and PayNow collaboration..",date:"May 1, 2023",category:"professional",excerpt:"An attempt to understand the \"plumbing behind the wall\" for the recent collaboration of two Instant Transfer schemes between India and Singapore. This post first explains domestic settlement, then extrapolates the logic to a cross-border scenario.",body:"",tags:["Finance","InstantPayments"],status:"published"},
+  {id:"seed-3",title:"On FED, and Open Market Operations (aka \"money printing\")",date:"May 1, 2023",category:"professional",excerpt:"In recent years, especially since 2008, we have been reading flashy headlines on FED's role in the global economy. There is truth in it, but those headlines also carry potential to mislead. Too often, FED is blamed more than it deserves.",body:"",tags:["Finance","MoneyMarket"],status:"published"},
+  {id:"seed-4",title:"Financial Intermediaries (& why Banks are special)",date:"May 1, 2023",category:"uncategorized",excerpt:"After a series of bank collapses, there were clamors online about general distrust towards banks, a resurgence of enthusiasm towards Bitcoin, and even hopes pinned on CBDC. There are a few things we must re-examine about banks fundamentally.",body:"",tags:["Finance","Professional"],status:"published"},
+  {id:"seed-5",title:"Why \"absolute percentage\" is a BAD way to judge your investments?",date:"Feb 26, 2023",category:"personal",excerpt:"\"I sold my house at triple the amount I bought 13 years back. 300% returns!!!\" You've heard such statements. But percentages in themselves do NOT tell you anything meaningful without the right context and time-adjusted metrics.",body:"",tags:["Financial Education","Personal Finance"],status:"published"},
+  {id:"seed-6",title:"Direct and Cover: \"what\" and \"why\"",date:"Feb 24, 2023",category:"professional",excerpt:"Let's see how a Direct and Cover in SWIFT MX looks like. Definitely cleaner in CBPR+ than in MT — but today the focus is on the \"why\" part. Why would a Bank prefer a Direct Cover over Serial, and sometimes vice-versa?",body:"",tags:["SWIFT CBPR+","Transfers"],status:"published"},
+  {id:"seed-7",title:"Benefit #3: Special Characters",date:"Feb 16, 2023",category:"professional",excerpt:"Banks will now be able to use special characters in certain fields of MX messages — characters which are NOT usable in the MT world but are now available in MX. A look at which fields support these and why it matters for cross-border payments.",body:"",tags:["SWIFT CBPR+","Transfers"],status:"published"},
+  {id:"seed-8",title:"Benefit #2: Postal Address…",date:"Feb 12, 2023",category:"professional",excerpt:"This benefit rides on the provision for structured data when documenting postal addresses. Apart from the obvious advantage of proper structure, having dedicated fields for address components opens new possibilities for compliance and routing.",body:"",tags:["SWIFT CBPR+","Transfers"],status:"published"},
+  {id:"seed-9",title:"Benefit #1: End To End Identification…",date:"Feb 11, 2023",category:"professional",excerpt:"As we approach the new language of exchanging transfer-related messages, one wonders… WHY? Especially banks must be wondering — after all, why?! SWIFT promises many benefits. Here's an honest look at the first and most significant one.",body:"",tags:["SWIFT CBPR+","Transfers"],status:"published"},
+  {id:"seed-10",title:"Direct pacs.008 with Cover pacs.009",date:"Feb 5, 2023",category:"professional",excerpt:"A depiction of key fields when a Direct pacs.008 is sent alongside a Cover pacs.009 — tracing the journey from Bank 1 to Bank 5, and the Cover message flowing through each intermediate bank along the way.",body:"",tags:["Transfers"],status:"published"}
+];
+
+function getPosts(){
+  const raw=localStorage.getItem("til_posts");
+  if(raw) return JSON.parse(raw);
+  localStorage.setItem("til_posts",JSON.stringify(SEED));
+  return SEED;
+}
+
+let currentFilter="all";
+
+function render(){
+  const query=document.getElementById("searchInput").value.toLowerCase();
+  const list=document.getElementById("postList");
+  list.innerHTML="";
+  const posts=getPosts().filter(p=>p.status==="published");
+  const filtered=posts.filter(p=>{
+    const mf=currentFilter==="all"||p.category===currentFilter;
+    const ms=p.title.toLowerCase().includes(query)||p.excerpt.toLowerCase().includes(query)||p.tags.some(t=>t.toLowerCase().includes(query));
+    return mf&&ms;
+  });
+  document.getElementById("emptyState").style.display=filtered.length===0?"block":"none";
+  filtered.forEach((post,i)=>{
+    const tagsHtml=post.tags.map(t=>`<span class="post-tag">${t}</span>`).join("");
+    list.innerHTML+=`
+      <article class="post" style="animation-delay:${i*.04}s">
+        <div class="post-inner">
+          <div class="post-top">
+            <div class="post-title">${post.title}</div>
+            <div class="post-date">${post.date}</div>
+          </div>
+          <p class="post-excerpt">${post.excerpt}</p>
+          <div class="post-footer">
+            <span class="post-cat-dot dot-${post.category}"></span>
+            ${tagsHtml}
+          </div>
+        </div>
+      </article>`;
+  });
+}
+
+function setFilter(btn){
+  document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  currentFilter=btn.dataset.filter;
+  render();
+}
+
+function toggleTheme(){
+  const h=document.documentElement,k=document.getElementById("knobIcon");
+  if(h.dataset.theme==="dark"){h.dataset.theme="light";k.textContent="☀️"}
+  else{h.dataset.theme="dark";k.textContent="🌙"}
+}
+
+render();
+</script>
+</body>
+</html>

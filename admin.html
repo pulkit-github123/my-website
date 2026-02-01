@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin — TODAY I LEARNED…</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  /* ─── THEME ─── */
+  [data-theme="dark"] {
+    --bg:#0e0e0e; --bg-elevated:#161616; --bg-hover:#1e1e1e; --bg-deep:#0a0a0a;
+    --text:#e4e4e4; --text-muted:#666; --text-subtle:#444;
+    --border:#242424; --accent:#c8a96e; --accent-dim:rgba(200,169,110,0.15);
+    --input-bg:#141414; --tag-bg:#1a1a1a; --tag-text:#888;
+    --danger:#c0392b; --danger-dim:rgba(192,57,43,0.15);
+    --success:#27ae60; --success-dim:rgba(39,174,96,0.15);
+    --blue:#5a9fd4; --blue-dim:rgba(90,159,212,0.15);
+  }
+  [data-theme="light"] {
+    --bg:#f8f7f4; --bg-elevated:#ffffff; --bg-hover:#f0efe9; --bg-deep:#edecea;
+    --text:#1a1a1a; --text-muted:#888; --text-subtle:#aaa;
+    --border:#e8e6e0; --accent:#a07840; --accent-dim:rgba(160,120,64,0.1);
+    --input-bg:#ffffff; --tag-bg:#eeece6; --tag-text:#777;
+    --danger:#c0392b; --danger-dim:rgba(192,57,43,0.1);
+    --success:#27ae60; --success-dim:rgba(39,174,96,0.1);
+    --blue:#2980b9; --blue-dim:rgba(41,128,185,0.1);
+  }
+
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'EB Garamond',Georgia,serif;background:var(--bg);color:var(--text);line-height:1.7;min-height:100vh;transition:background .35s,color .35s}
+
+  /* ─── LOGIN SCREEN ─── */
+  .login-screen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;transition:background .35s}
+  .login-screen.hidden{display:none}
+  .login-box{background:var(--bg-elevated);border:1px solid var(--border);border-radius:14px;padding:48px 40px 40px;width:90%;max-width:380px;text-align:center;transition:background .35s,border-color .35s;animation:fadeIn .4s ease}
+  .login-box .login-icon{font-size:2.2rem;margin-bottom:18px;display:block}
+  .login-box h2{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text);margin-bottom:5px;transition:color .35s}
+  .login-box .login-sub{font-size:.78rem;color:var(--text-subtle);font-style:italic;margin-bottom:30px;transition:color .35s}
+  .login-field{margin-bottom:14px;text-align:left}
+  .login-field label{display:block;font-family:'Syne',sans-serif;font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text-subtle);margin-bottom:6px;transition:color .35s}
+  .login-field input{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:7px;padding:11px 14px;font-family:'EB Garamond',Georgia,serif;font-size:.95rem;color:var(--text);outline:none;transition:border-color .2s,background .35s,color .35s}
+  .login-field input:focus{border-color:var(--accent)}
+  .login-field input::placeholder{color:var(--text-subtle)}
+  .login-error{font-family:'Syne',sans-serif;font-size:.64rem;color:var(--danger);text-transform:uppercase;letter-spacing:.06em;min-height:16px;text-align:left;margin-bottom:10px;opacity:0;transition:opacity .25s}
+  .login-error.show{opacity:1}
+  .btn-login{width:100%;margin-top:6px;font-family:'Syne',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;background:var(--accent);color:#fff;border:none;border-radius:7px;padding:12px;cursor:pointer;transition:opacity .2s}
+  .btn-login:hover{opacity:.85}
+  .login-theme-toggle{position:fixed;top:20px;right:24px;z-index:600;background:var(--bg-elevated);border:1px solid var(--border);border-radius:50px;width:46px;height:24px;cursor:pointer;transition:background .35s,border-color .35s;display:flex;align-items:center;padding:0 3px}
+  .login-theme-toggle .knob{width:18px;height:18px;border-radius:50%;background:var(--accent);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;justify-content:center;font-size:10px}
+  [data-theme="light"] .login-theme-toggle .knob{transform:translateX(20px)}
+
+  /* ─── LAYOUT ─── */
+  .shell{display:flex;min-height:100vh}
+
+  /* ─── SIDEBAR ─── */
+  .sidebar{width:240px;flex-shrink:0;background:var(--bg-deep);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:background .35s,border-color .35s;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .sidebar-logo{padding:32px 24px 28px;border-bottom:1px solid var(--border)}
+  .sidebar-logo h1{font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text);transition:color .35s}
+  .sidebar-logo p{font-size:.72rem;color:var(--text-subtle);margin-top:3px;font-style:italic}
+  .sidebar nav{padding:16px 12px;flex:1}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:7px;cursor:pointer;font-family:'Syne',sans-serif;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--text-muted);transition:all .2s;text-decoration:none;margin-bottom:2px}
+  .nav-item:hover{background:var(--bg-hover);color:var(--text)}
+  .nav-item.active{background:var(--accent-dim);color:var(--accent)}
+  .nav-item .icon{width:16px;text-align:center;font-size:14px}
+  .sidebar-bottom{padding:16px 12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px}
+  .theme-toggle-sidebar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px}
+  .theme-toggle-sidebar span{font-family:'Syne',sans-serif;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-subtle)}
+  .pill{width:42px;height:22px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:50px;cursor:pointer;position:relative;transition:all .3s}
+  .pill .dot{width:16px;height:16px;border-radius:50%;background:var(--accent);position:absolute;top:2px;left:2px;transition:transform .3s cubic-bezier(.4,0,.2,1);font-size:9px;display:flex;align-items:center;justify-content:center}
+  [data-theme="light"] .pill .dot{transform:translateX(20px)}
+
+  /* logout */
+  .logout-btn{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:7px;cursor:pointer;font-family:'Syne',sans-serif;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--danger);background:none;border:none;width:100%;transition:background .2s}
+  .logout-btn:hover{background:var(--danger-dim)}
+  .logged-in-as{font-family:'Syne',sans-serif;font-size:.6rem;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.06em;padding:0 14px 6px;transition:color .35s}
+
+  /* ─── MAIN ─── */
+  .main{flex:1;overflow-y:auto;padding:40px 40px 60px}
+
+  /* ─── TOP BAR ─── */
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:36px}
+  .topbar h2{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);transition:color .35s}
+  .topbar .btn-new{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;background:var(--accent);color:#fff;border:none;border-radius:7px;padding:9px 20px;cursor:pointer;transition:opacity .2s}
+  .topbar .btn-new:hover{opacity:.85}
+
+  /* ─── POST LIST ─── */
+  .post-table{display:flex;flex-direction:column;gap:6px}
+  .post-row{display:flex;align-items:center;gap:14px;background:var(--bg-elevated);border-radius:8px;padding:16px 20px;transition:background .2s;animation:fadeIn .3s ease both}
+  .post-row:hover{background:var(--bg-hover)}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .post-row .row-status{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+  .status-published{background:var(--success)}.status-draft{background:var(--text-subtle)}
+  .post-row .row-info{flex:1;min-width:0}
+  .post-row .row-title{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .35s}
+  .post-row .row-meta{font-size:.72rem;color:var(--text-subtle);margin-top:2px;transition:color .35s}
+  .post-row .row-actions{display:flex;gap:6px;flex-shrink:0}
+  .btn-sm{font-family:'Syne',sans-serif;font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:5px 11px;border-radius:5px;border:1px solid var(--border);background:var(--tag-bg);color:var(--tag-text);cursor:pointer;transition:all .2s;white-space:nowrap}
+  .btn-sm:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* ─── EDITOR ─── */
+  .editor-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:none;align-items:stretch;justify-content:flex-end;backdrop-filter:blur(3px)}
+  .editor-overlay.open{display:flex}
+  .editor-panel{width:min(680px,100%);background:var(--bg-elevated);border-left:1px solid var(--border);display:flex;flex-direction:column;height:100%;overflow-y:auto;transition:background .35s,border-color .35s;animation:slideIn .25s ease}
+  @keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+  .editor-header{display:flex;justify-content:space-between;align-items:center;padding:28px 32px 20px;border-bottom:1px solid var(--border)}
+  .editor-header h3{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text);transition:color .35s}
+  .editor-close{background:none;border:none;font-size:1.4rem;color:var(--text-muted);cursor:pointer;transition:color .2s;line-height:1}
+  .editor-close:hover{color:var(--danger)}
+  .editor-body{padding:28px 32px;flex:1;display:flex;flex-direction:column;gap:22px}
+  .field label{display:block;font-family:'Syne',sans-serif;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text-subtle);margin-bottom:7px;transition:color .35s}
+  .field input,.field textarea,.field select{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:7px;padding:11px 14px;font-family:'EB Garamond',Georgia,serif;font-size:.95rem;color:var(--text);outline:none;transition:border-color .2s,background .35s,color .35s;resize:vertical}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
+  .field select{font-family:'Syne',sans-serif;font-size:.75rem;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23666'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer}
+  .field select option{background:var(--input-bg);color:var(--text)}
+  .field textarea{min-height:120px;line-height:1.75}
+
+  /* tags */
+  .tags-wrap{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--input-bg);border:1px solid var(--border);border-radius:7px;padding:8px 10px;transition:border-color .2s,background .35s}
+  .tags-wrap:focus-within{border-color:var(--accent)}
+  .tags-wrap .tag-chip{font-family:'Syne',sans-serif;font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;background:var(--accent-dim);color:var(--accent);padding:4px 10px;border-radius:4px;display:flex;align-items:center;gap:6px}
+  .tags-wrap .tag-chip .remove{cursor:pointer;opacity:.6;font-size:10px;transition:opacity .2s}
+  .tags-wrap .tag-chip .remove:hover{opacity:1}
+  .tags-wrap input{border:none;background:transparent;outline:none;font-family:'Syne',sans-serif;font-size:.72rem;color:var(--text);flex:1;min-width:80px;padding:2px 4px;transition:color .35s}
+  .tags-wrap input::placeholder{color:var(--text-subtle)}
+
+  /* status */
+  .status-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+  .status-row span{font-family:'Syne',sans-serif;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-subtle)}
+  .status-pills{display:flex;gap:6px}
+  .status-pill{font-family:'Syne',sans-serif;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:6px 14px;border-radius:5px;border:1px solid var(--border);background:var(--tag-bg);color:var(--tag-text);cursor:pointer;transition:all .2s}
+  .status-pill.active-draft{background:var(--blue-dim);border-color:var(--blue);color:var(--blue)}
+  .status-pill.active-published{background:var(--success-dim);border-color:var(--success);color:var(--success)}
+
+  .editor-footer{display:flex;justify-content:space-between;align-items:center;padding:20px 32px 28px;border-top:1px solid var(--border);margin-top:auto}
+  .editor-footer .btn-save{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;background:var(--accent);color:#fff;border:none;border-radius:7px;padding:10px 24px;cursor:pointer;transition:opacity .2s}
+  .editor-footer .btn-save:hover{opacity:.85}
+  .editor-footer .btn-del{font-family:'Syne',sans-serif;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;background:none;border:none;color:var(--danger);cursor:pointer;transition:opacity .2s;padding:10px 0}
+  .editor-footer .btn-del:hover{opacity:.7}
+
+  /* toast */
+  .toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:12px 24px;font-family:'Syne',sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,.3);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:300;display:flex;align-items:center;gap:10px}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast .toast-dot{width:7px;height:7px;border-radius:50%}
+  .toast .toast-dot.green{background:var(--success)}.toast .toast-dot.red{background:var(--danger)}
+
+  /* confirm */
+  .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+  .confirm-overlay.open{display:flex}
+  .confirm-box{background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;padding:32px;max-width:360px;width:90%;text-align:center;transition:background .35s}
+  .confirm-box p{font-size:.92rem;color:var(--text-muted);margin-bottom:22px;line-height:1.6}
+  .confirm-box .confirm-btns{display:flex;gap:10px;justify-content:center}
+  .confirm-box .btn-confirm{font-family:'Syne',sans-serif;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;background:var(--danger);color:#fff;border:none;border-radius:6px;padding:9px 20px;cursor:pointer;transition:opacity .2s}
+  .confirm-box .btn-confirm:hover{opacity:.8}
+  .confirm-box .btn-cancel{font-family:'Syne',sans-serif;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;background:var(--tag-bg);color:var(--tag-text);border:1px solid var(--border);border-radius:6px;padding:9px 20px;cursor:pointer;transition:all .2s}
+  .confirm-box .btn-cancel:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* stats */
+  .stats{display:flex;gap:12px;margin-bottom:30px}
+  .stat-card{flex:1;background:var(--bg-elevated);border-radius:8px;padding:18px 20px;transition:background .35s}
+  .stat-card .stat-num{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;color:var(--text);transition:color .35s}
+  .stat-card .stat-label{font-family:'Syne',sans-serif;font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-subtle);margin-top:3px;transition:color .35s}
+
+  .back-link{display:inline-flex;align-items:center;gap:6px;font-family:'Syne',sans-serif;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-subtle);text-decoration:none;margin-bottom:28px;transition:color .2s}
+  .back-link:hover{color:var(--accent)}
+
+  @media(max-width:700px){
+    .shell{flex-direction:column}
+    .sidebar{width:100%;height:auto;position:static;flex-direction:row;border-right:none;border-bottom:1px solid var(--border);overflow-x:auto}
+    .sidebar-logo{padding:16px 20px;border-bottom:none;border-right:1px solid var(--border);flex-shrink:0}
+    .sidebar nav{display:flex;gap:4px;padding:12px 8px;flex-shrink:0}
+    .nav-item{margin-bottom:0;white-space:nowrap}
+    .sidebar-bottom{display:none}
+    .main{padding:24px 18px 48px}
+    .editor-panel{width:100%}
+    .stats{flex-direction:column}
+    .login-box{padding:36px 24px 30px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── LOGIN SCREEN ─── -->
+<div class="login-screen" id="loginScreen">
+  <button class="login-theme-toggle" onclick="toggleTheme()"><div class="knob" id="loginThemeKnob">🌙</div></button>
+  <div class="login-box">
+    <span class="login-icon">🔐</span>
+    <h2>Admin Login</h2>
+    <p class="login-sub">Today I Learned…</p>
+    <div class="login-field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="your@email.com" onkeydown="if(event.key==='Enter') attemptLogin()"/>
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter') attemptLogin()"/>
+    </div>
+    <div class="login-error" id="loginError">Invalid email or password</div>
+    <button class="btn-login" onclick="attemptLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- ─── ADMIN SHELL ─── -->
+<div class="shell" id="adminShell" style="display:none">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>TIL</h1>
+      <p>Admin Panel</p>
+    </div>
+    <nav>
+      <a href="#" class="nav-item active"><span class="icon">📝</span> Posts</a>
+      <a href="index.html" class="nav-item"><span class="icon">🌐</span> View Blog</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="logged-in-as" id="loggedInAs"></div>
+      <div class="theme-toggle-sidebar">
+        <span>Theme</span>
+        <div class="pill" onclick="toggleTheme()"><div class="dot" id="pillDot">🌙</div></div>
+      </div>
+      <button class="logout-btn" onclick="logout()"><span>🚪</span> Logout</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <a href="index.html" class="back-link">← Back to Blog</a>
+    <div class="stats" id="statsRow"></div>
+    <div class="topbar">
+      <h2>All Articles</h2>
+      <button class="btn-new" onclick="openEditor(null)">+ New Article</button>
+    </div>
+    <div class="post-table" id="postTable"></div>
+  </main>
+</div>
+
+<!-- ─── EDITOR ─── -->
+<div class="editor-overlay" id="editorOverlay">
+  <div class="editor-panel">
+    <div class="editor-header">
+      <h3 id="editorTitle">New Article</h3>
+      <button class="editor-close" onclick="closeEditor()">×</button>
+    </div>
+    <div class="editor-body">
+      <div class="field"><label>Title</label><input type="text" id="inputTitle" placeholder="Article title…"/></div>
+      <div class="field"><label>Excerpt <span style="font-weight:400;text-transform:none;letter-spacing:0">(short summary shown on blog)</span></label><textarea id="inputExcerpt" placeholder="Write a short excerpt…" rows="3"></textarea></div>
+      <div class="field"><label>Article Body</label><textarea id="inputBody" placeholder="Write your full article here…" rows="8"></textarea></div>
+      <div class="field"><label>Category</label>
+        <select id="inputCategory">
+          <option value="professional">Professional</option>
+          <option value="personal">Personal</option>
+          <option value="uncategorized">Uncategorized</option>
+        </select>
+      </div>
+      <div class="field"><label>Tags</label>
+        <div class="tags-wrap" id="tagsWrap">
+          <input type="text" id="tagInput" placeholder="Type a tag, press Enter…" onkeydown="handleTagKey(event)"/>
+        </div>
+      </div>
+      <div class="status-row">
+        <span>Status</span>
+        <div class="status-pills">
+          <button class="status-pill active-draft" id="btnDraft" onclick="setStatus('draft')">Draft</button>
+          <button class="status-pill" id="btnPublished" onclick="setStatus('published')">Published</button>
+        </div>
+      </div>
+    </div>
+    <div class="editor-footer">
+      <button class="btn-del" id="btnDelete" onclick="confirmDelete()" style="display:none">Delete Article</button>
+      <button class="btn-save" onclick="saveArticle()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── CONFIRM ─── -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <p>Are you sure you want to delete this article? This cannot be undone.</p>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-confirm" onclick="doDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOAST ─── -->
+<div class="toast" id="toast">
+  <span class="toast-dot green" id="toastDot"></span>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+// ─── AUTH CONFIG ───
+// Allowed email (set by you)
+const ALLOWED_EMAIL = "pulkitsinghai55@gmail.com";
+// SHA-256 hash of your password. Current hash below = "admin123"
+// To change: run  crypto.subtle.digest('SHA-256', new TextEncoder().encode('yournewpassword'))
+//            then paste the hex result here.
+const PASSWORD_HASH = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9";
+
+// ─── SESSION ───
+function isLoggedIn(){ return sessionStorage.getItem("til_auth")==="true"; }
+function setLoggedIn(){ sessionStorage.setItem("til_auth","true"); }
+function clearLogin(){ sessionStorage.removeItem("til_auth"); }
+
+// ─── HASH HELPER ───
+async function sha256(msg){
+  const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+// ─── LOGIN ───
+async function attemptLogin(){
+  const email=document.getElementById("loginEmail").value.trim().toLowerCase();
+  const pass=document.getElementById("loginPassword").value;
+  const errEl=document.getElementById("loginError");
+
+  if(email!==ALLOWED_EMAIL.toLowerCase()){
+    errEl.classList.add("show"); return;
+  }
+
+  const hash=await sha256(pass);
+  if(hash!==PASSWORD_HASH){
+    errEl.classList.add("show"); return;
+  }
+
+  // success
+  errEl.classList.remove("show");
+  setLoggedIn();
+  showAdmin();
+}
+
+function showAdmin(){
+  document.getElementById("loginScreen").classList.add("hidden");
+  document.getElementById("adminShell").style.display="flex";
+  document.getElementById("loggedInAs").textContent=ALLOWED_EMAIL;
+  renderList();
+}
+
+function logout(){
+  clearLogin();
+  document.getElementById("loginScreen").classList.remove("hidden");
+  document.getElementById("adminShell").style.display="none";
+  document.getElementById("loginEmail").value="";
+  document.getElementById("loginPassword").value="";
+}
+
+// ─── SEED DATA ───
+const SEED=[
+  {id:"seed-1",title:"What is a CAGR, IRR and XIRR and how do they look?",date:"May 1, 2023",category:"personal",excerpt:"The prequel to this post is about why absolute percentage is a bad way to judge investments. But it is not necessary — you can just devour the diagrams below to better understand what CAGR, IRR, and XIRR really mean, and how they visually differ.",body:"",tags:["Financial Education","Personal Finance"],status:"published"},
+  {id:"seed-2",title:"On UPI and PayNow collaboration..",date:"May 1, 2023",category:"professional",excerpt:"An attempt to understand the \"plumbing behind the wall\" for the recent collaboration of two Instant Transfer schemes between India and Singapore. This post first explains domestic settlement, then extrapolates the logic to a cross-border scenario.",body:"",tags:["Finance","InstantPayments"],status:"published"},
+  {id:"seed-3",title:"On FED, and Open Market Operations (aka \"money printing\")",date:"May 1, 2023",category:"professional",excerpt:"In recent years, especially since 2008, we have been reading flashy headlines on FED's role in the global economy. There is truth in it, but those headlines also carry potential to mislead. Too often, FED is blamed more than it deserves.",body:"",tags:["Finance","MoneyMarket"],status:"published"},
+  {id:"seed-4",title:"Financial Intermediaries (& why Banks are special)",date:"May 1, 2023",category:"uncategorized",excerpt:"After a series of bank collapses, there were clamors online about general distrust towards banks, a resurgence of enthusiasm towards Bitcoin, and even hopes pinned on CBDC. There are a few things we must re-examine about banks fundamentally.",body:"",tags:["Finance","Professional"],status:"published"},
+  {id:"seed-5",title:"Why \"absolute percentage\" is a BAD way to judge your investments?",date:"Feb 26, 2023",category:"personal",excerpt:"\"I sold my house at triple the amount I bought 13 years back. 300% returns!!!\" You've heard such statements. But percentages in themselves do NOT tell you anything meaningful without the right context and time-adjusted metrics.",body:"",tags:["Financial Education","Personal Finance"],status:"published"},
+  {id:"seed-6",title:"Direct and Cover: \"what\" and \"why\"",date:"Feb 24, 2023",category:"professional",excerpt:"Let's see how a Direct and Cover in SWIFT MX looks like. Definitely cleaner in CBPR+ than in MT — but today the focus is on the \"why\" part. Why would a Bank prefer a Direct Cover over Serial, and sometimes vice-versa?",body:"",tags:["SWIFT CBPR+","Transfers"],status:"published"},
+  {id:"seed-7",title:"Benefit #3: Special Characters",date:"Feb 16, 2023",category:"professional",excerpt:"Banks will now be able to use special characters in certain fields of MX messages — characters which are NOT usable in the MT world but are now available in MX. A look at which fields support these and why it matters for cross-border payments.",body:"",tags:["SWIFT CBPR+","Transfers"],status:"published"},
+  {id:"seed-8",title:"Benefit #2: Postal Address…",date:"Feb 12, 2023",category:"professional",excerpt:"This benefit rides on the provision for structured data when documenting postal addresses. Apart from the obvious advantage of proper structure, having dedicated fields for address components opens new possibilities for compliance and routing.",body:"",tags:["SWIFT CBPR+","Transfers"],status:"published"},
+  {id:"seed-9",title:"Benefit #1: End To End Identification…",date:"Feb 11, 2023",category:"professional",excerpt:"As we approach the new language of exchanging transfer-related messages, one wonders… WHY? Especially banks must be wondering — after all, why?! SWIFT promises many benefits. Here's an honest look at the first and most significant one.",body:"",tags:["SWIFT CBPR+","Transfers"],status:"published"},
+  {id:"seed-10",title:"Direct pacs.008 with Cover pacs.009",date:"Feb 5, 2023",category:"professional",excerpt:"A depiction of key fields when a Direct pacs.008 is sent alongside a Cover pacs.009 — tracing the journey from Bank 1 to Bank 5, and the Cover message flowing through each intermediate bank along the way.",body:"",tags:["Transfers"],status:"published"}
+];
+
+// ─── DATA ───
+function getPosts(){
+  const raw=localStorage.getItem("til_posts");
+  if(raw) return JSON.parse(raw);
+  localStorage.setItem("til_posts",JSON.stringify(SEED));
+  return SEED;
+}
+function savePosts(arr){ localStorage.setItem("til_posts",JSON.stringify(arr)); }
+
+// ─── EDITOR STATE ───
+let editingId=null, currentStatus="draft", currentTags=[];
+
+// ─── RENDER ───
+function renderList(){
+  const posts=getPosts();
+  const table=document.getElementById("postTable");
+  table.innerHTML="";
+  const pub=posts.filter(p=>p.status==="published").length;
+  const dra=posts.filter(p=>p.status==="draft").length;
+  document.getElementById("statsRow").innerHTML=`
+    <div class="stat-card"><div class="stat-num">${posts.length}</div><div class="stat-label">Total</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--success)">${pub}</div><div class="stat-label">Published</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--blue)">${dra}</div><div class="stat-label">Drafts</div></div>`;
+  posts.forEach((p,i)=>{
+    table.innerHTML+=`
+      <div class="post-row" style="animation-delay:${i*.03}s">
+        <span class="row-status status-${p.status}"></span>
+        <div class="row-info">
+          <div class="row-title">${p.title||'(Untitled)'}</div>
+          <div class="row-meta">${p.category} · ${p.date} · ${p.status}</div>
+        </div>
+        <div class="row-actions"><button class="btn-sm" onclick="openEditor('${p.id}')">Edit</button></div>
+      </div>`;
+  });
+}
+
+// ─── EDITOR ───
+function openEditor(id){
+  editingId=id;
+  if(id===null){
+    document.getElementById("editorTitle").textContent="New Article";
+    document.getElementById("inputTitle").value="";
+    document.getElementById("inputExcerpt").value="";
+    document.getElementById("inputBody").value="";
+    document.getElementById("inputCategory").value="professional";
+    currentTags=[]; currentStatus="draft";
+    document.getElementById("btnDelete").style.display="none";
+  } else {
+    const post=getPosts().find(p=>p.id===id);
+    if(!post) return;
+    document.getElementById("editorTitle").textContent="Edit Article";
+    document.getElementById("inputTitle").value=post.title;
+    document.getElementById("inputExcerpt").value=post.excerpt;
+    document.getElementById("inputBody").value=post.body||"";
+    document.getElementById("inputCategory").value=post.category;
+    currentTags=[...post.tags]; currentStatus=post.status;
+    document.getElementById("btnDelete").style.display="block";
+  }
+  renderTags(); updateStatusPills();
+  document.getElementById("editorOverlay").classList.add("open");
+}
+function closeEditor(){ document.getElementById("editorOverlay").classList.remove("open"); editingId=null; }
+
+// ─── TAGS ───
+function renderTags(){
+  const wrap=document.getElementById("tagsWrap");
+  const input=document.getElementById("tagInput");
+  wrap.innerHTML="";
+  currentTags.forEach((t,i)=>{ wrap.innerHTML+=`<span class="tag-chip">${t}<span class="remove" onclick="removeTag(${i})">×</span></span>`; });
+  wrap.appendChild(input); input.value="";
+}
+function handleTagKey(e){
+  if(e.key==="Enter"){ e.preventDefault(); const v=e.target.value.trim(); if(v&&!currentTags.includes(v)){currentTags.push(v);renderTags()}else{e.target.value=""} }
+  if(e.key==="Backspace"&&e.target.value===""&&currentTags.length>0){currentTags.pop();renderTags()}
+}
+function removeTag(i){ currentTags.splice(i,1); renderTags(); }
+
+// ─── STATUS ───
+function setStatus(s){ currentStatus=s; updateStatusPills(); }
+function updateStatusPills(){
+  document.getElementById("btnDraft").className="status-pill"+(currentStatus==="draft"?" active-draft":"");
+  document.getElementById("btnPublished").className="status-pill"+(currentStatus==="published"?" active-published":"");
+}
+
+// ─── SAVE ───
+function saveArticle(){
+  const title=document.getElementById("inputTitle").value.trim();
+  if(!title){ showToast("Please add a title.","red"); return; }
+  let posts=getPosts();
+  if(editingId===null){
+    const date=new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+    posts.unshift({id:"post-"+Date.now(),title,date,category:document.getElementById("inputCategory").value,excerpt:document.getElementById("inputExcerpt").value.trim(),body:document.getElementById("inputBody").value.trim(),tags:currentTags,status:currentStatus});
+    savePosts(posts); showToast("Article created.","green");
+  } else {
+    const idx=posts.findIndex(p=>p.id===editingId); if(idx===-1)return;
+    posts[idx].title=title; posts[idx].excerpt=document.getElementById("inputExcerpt").value.trim();
+    posts[idx].body=document.getElementById("inputBody").value.trim();
+    posts[idx].category=document.getElementById("inputCategory").value;
+    posts[idx].tags=currentTags; posts[idx].status=currentStatus;
+    savePosts(posts); showToast("Article updated.","green");
+  }
+  closeEditor(); renderList();
+}
+
+// ─── DELETE ───
+function confirmDelete(){ document.getElementById("confirmOverlay").classList.add("open"); }
+function closeConfirm(){ document.getElementById("confirmOverlay").classList.remove("open"); }
+function doDelete(){ let p=getPosts().filter(x=>x.id!==editingId); savePosts(p); closeConfirm(); closeEditor(); renderList(); showToast("Article deleted.","red"); }
+
+// ─── TOAST ───
+let toastTimeout;
+function showToast(msg,color){
+  const t=document.getElementById("toast");
+  document.getElementById("toastMsg").textContent=msg;
+  document.getElementById("toastDot").className="toast-dot "+color;
+  t.classList.add("show"); clearTimeout(toastTimeout);
+  toastTimeout=setTimeout(()=>t.classList.remove("show"),2200);
+}
+
+// ─── THEME ───
+function toggleTheme(){
+  const h=document.documentElement;
+  const isDark=h.dataset.theme==="dark";
+  h.dataset.theme=isDark?"light":"dark";
+  const icon=isDark?"☀️":"🌙";
+  document.getElementById("pillDot").textContent=icon;
+  document.getElementById("loginThemeKnob").textContent=icon;
+}
+
+// ─── INIT ───
+if(isLoggedIn()) showAdmin();
+</script>
+</body>
+</html>
